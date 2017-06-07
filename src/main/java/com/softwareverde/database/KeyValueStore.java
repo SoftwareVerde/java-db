@@ -8,5 +8,4 @@ public interface KeyValueStore {
     void removeKey(String key);
 
     void clear();
-    void clearAllStores();
 }
