@@ -2,7 +2,7 @@ package com.softwareverde.database;
 
 import java.util.List;
 
-public interface DatabaseConnection<T> {
+public interface DatabaseConnection<T> extends AutoCloseable {
 
     void executeDdl(final String query) throws DatabaseException;
     void executeDdl(final Query query) throws DatabaseException;
