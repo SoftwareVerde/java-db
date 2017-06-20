@@ -1,5 +1,6 @@
 package com.softwareverde.database.transaction;
 
+import com.softwareverde.database.Database;
 import com.softwareverde.database.DatabaseConnection;
 import com.softwareverde.database.DatabaseException;
 
@@ -8,15 +9,15 @@ import java.sql.SQLException;
 
 public class JdbcDatabaseTransaction implements DatabaseTransaction<Connection> {
 
-    private final DatabaseConnectionProvider<Connection> _databaseConnectionProvider;
+    private final Database<Connection> _database;
 
-    public JdbcDatabaseTransaction(DatabaseConnectionProvider<Connection> databaseConnectionProvider) {
-        _databaseConnectionProvider = databaseConnectionProvider;
+    public JdbcDatabaseTransaction(Database<Connection> database) {
+        _database = database;
     }
 
     @Override
     public void execute(final DatabaseConnectedRunnable<Connection> databaseConnectedRunnable) throws DatabaseException {
-        try (final DatabaseConnection<Connection> databaseConnection = _databaseConnectionProvider.getNewDatabaseConnection()) {
+        try (final DatabaseConnection<Connection> databaseConnection = _database.newConnection()) {
             Connection connection = null;
             try {
                 connection = databaseConnection.getRawConnection();
