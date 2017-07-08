@@ -1,4 +1,4 @@
-package com.softwareverde.database.mysqlmemorydatabase;
+package com.softwareverde.database.memory.mysql;
 
 import com.softwareverde.database.DatabaseConnection;
 import com.softwareverde.database.DatabaseException;
@@ -93,7 +93,14 @@ public class MysqlMemoryDatabaseConnection implements DatabaseConnection<Connect
     }
 
     @Override
-    public void close() throws DatabaseException { }
+    public void close() throws DatabaseException {
+        try {
+            _connection.close();
+        }
+        catch (final SQLException sqlException) {
+            throw new DatabaseException(sqlException);
+        }
+    }
 
     @Override
     public Connection getRawConnection() {

@@ -8,38 +8,30 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class JdbcDatabaseTransaction implements DatabaseTransaction<Connection> {
-
     protected final Database<Connection> _database;
-
-    protected void _quietRollback(final Connection connection) {
-        if (connection != null) {
-            try {
-                connection.rollback();
-            }
-            catch (final SQLException exception) { }
-        }
-    }
 
     public JdbcDatabaseTransaction(final Database<Connection> database) {
         _database = database;
     }
 
     @Override
-    public void execute(final DatabaseRunnable<Connection> databaseRunnable) throws DatabaseException {
+    public void execute(final DatabaseRunnable<Connection> databaseConnectedRunnable) throws DatabaseException {
         try (final DatabaseConnection<Connection> databaseConnection = _database.newConnection()) {
-            Connection connection = null;
+            final Connection connection = databaseConnection.getRawConnection(); // Should be closed for us by DatabaseConnection.close()
+
             try {
-                connection = databaseConnection.getRawConnection();
                 connection.setAutoCommit(false);
-
-                databaseRunnable.run(databaseConnection);
-
+                databaseConnectedRunnable.run(databaseConnection);
                 connection.commit();
             }
-            catch (final Exception exception) {
-                _quietRollback(connection);
-                throw new DatabaseException("Unable to complete action.", exception);
+            catch (final SQLException sqlException) {
+                connection.rollback();
+                throw sqlException;
             }
+
+        }
+        catch (final Exception exception) {
+            throw new DatabaseException("Unable to complete query.", exception);
         }
     }
 }

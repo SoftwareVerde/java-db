@@ -1,4 +1,4 @@
-package com.softwareverde.database.mysqlmemorydatabase;
+package com.softwareverde.database.memory.mysql;
 
 import com.softwareverde.database.Row;
 import com.softwareverde.util.StringUtil;
