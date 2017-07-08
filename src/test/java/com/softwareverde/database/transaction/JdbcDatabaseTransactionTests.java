@@ -2,6 +2,7 @@ package com.softwareverde.database.transaction;
 
 import com.softwareverde.database.*;
 import com.softwareverde.database.memory.mysql.MysqlMemoryDatabase;
+import com.softwareverde.util.Container;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -140,5 +141,41 @@ public class JdbcDatabaseTransactionTests {
 
         // Assert
         Assert.assertTrue(_database.getRawDatabaseConnection().isClosed());
+    }
+
+    @Test
+    public void should_rollback_statements_if_one_fails() throws Exception {
+        // Setup
+        final DatabaseTransaction<Connection> databaseTransaction = new JdbcDatabaseTransaction(_database);
+
+        try (final DatabaseConnection<Connection> databaseConnection = _database.actuallyGetNewConnection()) {
+            databaseConnection.executeSql(new Query("INSERT INTO test_table (test_column) VALUES (?)").setParameter("original value"));
+        }
+
+        final Container<String> midTransactionValue = new Container<String>();
+
+        // Action
+        try {
+            databaseTransaction.execute(new DatabaseRunnable<Connection>() {
+                @Override
+                public void run(final DatabaseConnection<Connection> databaseConnection) throws DatabaseException {
+                    databaseConnection.executeSql(new Query("UPDATE test_table SET test_column = ?").setParameter("new value"));
+
+                    final Row row = databaseConnection.query("SELECT * FROM test_table", null).get(0);
+                    midTransactionValue.value = row.getString("test_column");
+
+                    databaseConnection.executeSql(new Query("INVALID QUERY: SYNTAX ERROR"));
+                }
+            });
+        }
+        catch (final DatabaseException databaseException) { }
+
+        // Assert
+        Assert.assertEquals("new value", midTransactionValue.value); // Assert the initial update was successful before the rollback...
+
+        try (final DatabaseConnection<Connection> databaseConnection = _database.actuallyGetNewConnection()) {
+            final Row row = databaseConnection.query("SELECT * FROM test_table", null).get(0);
+            Assert.assertEquals("original value", row.getString("test_column"));
+        }
     }
 }
