@@ -9,6 +9,10 @@ public class Query {
     protected final String _query;
     protected final List<String> _parameters = new ArrayList<String>();
 
+    protected void _setBoolean(final boolean booleanValue) {
+        _parameters.add(booleanValue ? "1" : "0");
+    }
+
     public Query(final String query) {
         _query = query;
     }
@@ -18,9 +22,19 @@ public class Query {
             _parameters.add(null);
         }
         else {
-            _parameters.add(value.toString());
+            if (value instanceof Boolean) {
+                _setBoolean((Boolean) value);
+            }
+            else {
+                _parameters.add(value.toString());
+            }
         }
 
+        return this;
+    }
+
+    public Query setParameter(final boolean value) {
+        _setBoolean(value);
         return this;
     }
 
