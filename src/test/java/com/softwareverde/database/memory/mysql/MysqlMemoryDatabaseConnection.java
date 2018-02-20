@@ -4,6 +4,8 @@ import com.softwareverde.database.DatabaseConnection;
 import com.softwareverde.database.DatabaseException;
 import com.softwareverde.database.Query;
 import com.softwareverde.database.Row;
+import com.softwareverde.database.query.parameter.ParameterType;
+import com.softwareverde.database.query.parameter.TypedParameter;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,17 +14,57 @@ import java.util.List;
 public class MysqlMemoryDatabaseConnection implements DatabaseConnection<Connection> {
     private final Connection _connection;
 
-    private PreparedStatement _prepareStatement(final String query, final String[] parameters) throws SQLException {
+    private TypedParameter[] _stringArrayToTypedParameters(final String[] parameters) {
+        if (parameters == null) { return null; }
+
+        final TypedParameter[] typedParameters = new TypedParameter[parameters.length];
+        for (int i=0; i<parameters.length; ++i) {
+            typedParameters[i] = new TypedParameter(parameters[i], ParameterType.STRING);
+        }
+        return typedParameters;
+    }
+
+    private List<Row> _query(final String query, final TypedParameter[] typedParameters) throws DatabaseException {
+        try {
+            final List<Row> results = new ArrayList<Row>();
+            try (final PreparedStatement preparedStatement = _prepareStatement(query, typedParameters);
+                 final ResultSet resultSet = preparedStatement.executeQuery() ) {
+
+                if (resultSet.first()) {
+                    do {
+                        results.add(MysqlMemoryRow.fromResultSet(resultSet));
+                    } while (resultSet.next());
+                }
+            }
+            return results;
+        }
+        catch (final SQLException exception) {
+            throw new DatabaseException("Error executing query.", exception);
+        }
+    }
+
+    private PreparedStatement _prepareStatement(final String query, final TypedParameter[] parameters) throws SQLException {
         final PreparedStatement preparedStatement = _connection.prepareStatement(query);
         if (parameters != null) {
             for (int i = 0; i < parameters.length; ++i) {
-                preparedStatement.setString(i+1, parameters[i]);
+                final TypedParameter typedParameter = parameters[i];
+                switch (typedParameter.type) {
+                    case STRING: {
+                        preparedStatement.setString(i + 1, (String) parameters[i].value);
+                    } break;
+                    case BYTE_ARRAY: {
+                        preparedStatement.setBytes(i + 1, (byte[]) parameters[i].value);
+                    } break;
+                    case BOOLEAN: {
+                        preparedStatement.setBoolean(i + 1, (Boolean) parameters[i].value);
+                    }
+                }
             }
         }
         return preparedStatement;
     }
 
-    private void _executeSql(final String query, final String[] parameters) throws DatabaseException {
+    private void _executeSql(final String query, final TypedParameter[] parameters) throws DatabaseException {
         try (final PreparedStatement preparedStatement = _prepareStatement(query, parameters)) {
             preparedStatement.execute();
         }
@@ -55,41 +97,26 @@ public class MysqlMemoryDatabaseConnection implements DatabaseConnection<Connect
 
     @Override
     public Long executeSql(final String query, final String[] parameters) throws DatabaseException {
-        _executeSql(query, parameters);
+        final TypedParameter[] typedParameters = _stringArrayToTypedParameters(parameters);
+        _executeSql(query, typedParameters);
         return 0L;
     }
 
     @Override
     public Long executeSql(final Query query) throws DatabaseException {
-        return this.executeSql(query.getQueryString(), query.getParameters().toArray(new String[0]));
+        _executeSql(query.getQueryString(), query.getParameters().toArray(new TypedParameter[0]));
+        return 0L;
     }
 
     @Override
     public List<Row> query(final String query, final String[] parameters) throws DatabaseException {
-        try {
-            final List<Row> results = new ArrayList<Row>();
-            try (
-                    final PreparedStatement preparedStatement = _prepareStatement(query, parameters);
-                    final ResultSet resultSet = preparedStatement.executeQuery()
-                ) {
-
-                if (resultSet.first()) {
-                    do {
-                        results.add(MysqlMemoryRow.fromResultSet(resultSet));
-                    } while (resultSet.next());
-                }
-            }
-            return results;
-        }
-
-        catch (final SQLException exception) {
-            throw new DatabaseException("Error executing query.", exception);
-        }
+        final TypedParameter[] typedParameters = _stringArrayToTypedParameters(parameters);
+        return _query(query, typedParameters);
     }
 
     @Override
     public List<Row> query(final Query query) throws DatabaseException {
-        return this.query(query.getQueryString(), query.getParameters().toArray(new String[0]));
+        return _query(query.getQueryString(), query.getParameters().toArray(new TypedParameter[0]));
     }
 
     @Override
