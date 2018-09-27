@@ -1,5 +1,7 @@
 package com.softwareverde.database.memory.mysql;
 
+import com.softwareverde.constable.list.List;
+import com.softwareverde.constable.list.mutable.MutableList;
 import com.softwareverde.database.DatabaseConnection;
 import com.softwareverde.database.DatabaseException;
 import com.softwareverde.database.Query;
@@ -8,11 +10,17 @@ import com.softwareverde.database.query.parameter.ParameterType;
 import com.softwareverde.database.query.parameter.TypedParameter;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MysqlMemoryDatabaseConnection implements DatabaseConnection<Connection> {
     private final Connection _connection;
+
+    private TypedParameter[] _getTypedParametersAsArray(final List<TypedParameter> typedParameters) {
+        final TypedParameter[] typedParameterArray = new TypedParameter[typedParameters.getSize()];
+        for (int i = 0; i < typedParameterArray.length; ++i) {
+            typedParameterArray[i] = typedParameters.get(i);
+        }
+        return typedParameterArray;
+    }
 
     private TypedParameter[] _stringArrayToTypedParameters(final String[] parameters) {
         if (parameters == null) { return null; }
@@ -26,7 +34,7 @@ public class MysqlMemoryDatabaseConnection implements DatabaseConnection<Connect
 
     private List<Row> _query(final String query, final TypedParameter[] typedParameters) throws DatabaseException {
         try {
-            final List<Row> results = new ArrayList<Row>();
+            final MutableList<Row> results = new MutableList<Row>();
             try (final PreparedStatement preparedStatement = _prepareStatement(query, typedParameters);
                  final ResultSet resultSet = preparedStatement.executeQuery() ) {
 
@@ -104,7 +112,7 @@ public class MysqlMemoryDatabaseConnection implements DatabaseConnection<Connect
 
     @Override
     public Long executeSql(final Query query) throws DatabaseException {
-        _executeSql(query.getQueryString(), query.getParameters().toArray(new TypedParameter[0]));
+        _executeSql(query.getQueryString(), _getTypedParametersAsArray(query.getParameters()));
         return 0L;
     }
 
@@ -116,7 +124,7 @@ public class MysqlMemoryDatabaseConnection implements DatabaseConnection<Connect
 
     @Override
     public List<Row> query(final Query query) throws DatabaseException {
-        return _query(query.getQueryString(), query.getParameters().toArray(new TypedParameter[0]));
+        return _query(query.getQueryString(), _getTypedParametersAsArray(query.getParameters()));
     }
 
     @Override

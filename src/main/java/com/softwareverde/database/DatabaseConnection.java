@@ -1,6 +1,6 @@
 package com.softwareverde.database;
 
-import java.util.List;
+import com.softwareverde.constable.list.List;
 
 public interface DatabaseConnection<T> extends AutoCloseable {
 

@@ -1,15 +1,14 @@
 package com.softwareverde.database;
 
+import com.softwareverde.constable.bytearray.ByteArray;
+import com.softwareverde.constable.list.List;
+import com.softwareverde.constable.list.mutable.MutableList;
 import com.softwareverde.database.query.parameter.ParameterType;
 import com.softwareverde.database.query.parameter.TypedParameter;
-import com.softwareverde.util.Util;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class Query {
     protected final String _query;
-    protected final List<TypedParameter> _parameters = new ArrayList<TypedParameter>();
+    protected final MutableList<TypedParameter> _parameters = new MutableList<TypedParameter>();
 
     protected void _setBoolean(final boolean booleanValue) {
         _parameters.add(new TypedParameter(booleanValue, ParameterType.BOOLEAN));
@@ -34,6 +33,9 @@ public class Query {
             else if (value instanceof byte[]) {
                 _setByteArray((byte[]) value);
             }
+            else if (value instanceof ByteArray) {
+                _setByteArray(((ByteArray) value).getBytes());
+            }
             else {
                 _parameters.add(new TypedParameter(value.toString(), ParameterType.STRING));
             }
@@ -53,7 +55,7 @@ public class Query {
     }
 
     public List<TypedParameter> getParameters() {
-        return Util.copyList(_parameters);
+        return _parameters;
     }
 
     public String getQueryString() {
