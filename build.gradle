@@ -3,7 +3,7 @@ version '3.0.0'
 
 apply plugin: 'java'
 
-sourceCompatibility = 1.8
+sourceCompatibility = JavaVersion.VERSION_1_8
 
 task makeJar(type: Jar) {
     manifest {
@@ -58,12 +58,12 @@ tasks.withType(Javadoc) {
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-    archiveClassifier = 'sources'
+    archiveFileName = project.name + '-' + version + '-sources.jar'
     from sourceSets.main.allSource
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    archiveClassifier = 'javadoc'
+    archiveFileName = project.name + '-' + version + '-javadoc.jar'
     from javadoc.destinationDir
 }
 

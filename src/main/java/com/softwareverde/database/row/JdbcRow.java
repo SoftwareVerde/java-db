@@ -25,10 +25,21 @@ public class JdbcRow implements Row {
         CHARSET = charset;
     }
 
-    protected final List<String> _orderedColumnNames = new ArrayList<String>();
-    protected final Map<String, TypedParameter> _columnValues = new HashMap<String, TypedParameter>();
+    protected final List<String> _orderedColumnNames;
+    protected final Map<String, TypedParameter> _columnValues;
 
-    protected JdbcRow() { }
+    protected JdbcRow() {
+        _orderedColumnNames = new ArrayList<String>();
+        _columnValues = new HashMap<String, TypedParameter>();
+    }
+
+    /**
+     * Consumes the internal values of the provided jdbcRow.
+     */
+    protected JdbcRow(final JdbcRow jdbcRow) {
+        _orderedColumnNames = jdbcRow._orderedColumnNames;
+        _columnValues = jdbcRow._columnValues;
+    }
 
     protected TypedParameter _getValue(final String columnName) throws IllegalArgumentException {
         final String lowerCaseColumnName = columnName.toLowerCase();
