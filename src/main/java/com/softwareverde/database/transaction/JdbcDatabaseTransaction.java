@@ -1,22 +1,21 @@
 package com.softwareverde.database.transaction;
 
-import com.softwareverde.database.Database;
 import com.softwareverde.database.DatabaseConnection;
+import com.softwareverde.database.DatabaseConnectionFactory;
 import com.softwareverde.database.DatabaseException;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 public class JdbcDatabaseTransaction implements DatabaseTransaction<Connection> {
-    protected final Database<Connection> _database;
+    protected final DatabaseConnectionFactory<Connection> _databaseConnectionFactory;
 
-    public JdbcDatabaseTransaction(final Database<Connection> database) {
-        _database = database;
+    public JdbcDatabaseTransaction(final DatabaseConnectionFactory<Connection> databaseConnectionFactory) {
+        _databaseConnectionFactory = databaseConnectionFactory;
     }
 
     @Override
     public void execute(final DatabaseRunnable<Connection> databaseConnectedRunnable) throws DatabaseException {
-        try (final DatabaseConnection<Connection> databaseConnection = _database.newConnection()) {
+        try (final DatabaseConnection<Connection> databaseConnection = _databaseConnectionFactory.newConnection()) {
             final Connection connection = databaseConnection.getRawConnection(); // Should be closed for us by DatabaseConnection.close()
 
             try {
@@ -24,9 +23,9 @@ public class JdbcDatabaseTransaction implements DatabaseTransaction<Connection> 
                 databaseConnectedRunnable.run(databaseConnection);
                 connection.commit();
             }
-            catch (final SQLException sqlException) {
+            catch (final Exception exception) {
                 connection.rollback();
-                throw sqlException;
+                throw exception;
             }
 
         }
