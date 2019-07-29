@@ -1,6 +1,6 @@
 package com.softwareverde.database;
 
-import com.softwareverde.database.properties.Credentials;
+import com.softwareverde.database.properties.DatabaseCredentials;
 import com.softwareverde.database.properties.DatabaseProperties;
 
 public interface DatabaseInitializer<T> {
@@ -13,7 +13,7 @@ public interface DatabaseInitializer<T> {
      */
     void initializeSchema(DatabaseConnection<T> rootDatabaseConnection, DatabaseProperties databaseProperties) throws DatabaseException;
 
-    Credentials getMaintenanceCredentials(DatabaseProperties databaseProperties);
+    DatabaseCredentials getMaintenanceCredentials(DatabaseProperties databaseProperties);
 
     Integer getDatabaseVersionNumber(DatabaseConnection<T> databaseConnection);
 

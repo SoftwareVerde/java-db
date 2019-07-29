@@ -38,13 +38,13 @@ public class MutableDatabaseProperties implements DatabaseProperties {
     public Integer getPort() { return _port; }
 
     @Override
-    public Credentials getRootCredentials() {
-        return new Credentials("root", _rootPassword);
+    public DatabaseCredentials getRootCredentials() {
+        return new DatabaseCredentials("root", _rootPassword);
     }
 
     @Override
-    public Credentials getCredentials() {
-        return new Credentials(_username, _password);
+    public DatabaseCredentials getCredentials() {
+        return new DatabaseCredentials(_username, _password);
     }
 
     public void setRootPassword(final String rootPassword) { _rootPassword = rootPassword; }

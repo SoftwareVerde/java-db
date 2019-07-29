@@ -8,6 +8,6 @@ public interface DatabaseProperties {
     String getSchema();
     Integer getPort();
 
-    Credentials getRootCredentials();
-    Credentials getCredentials();
+    DatabaseCredentials getRootCredentials();
+    DatabaseCredentials getCredentials();
 }
