@@ -3,19 +3,14 @@ package com.softwareverde.database.query;
 import com.softwareverde.constable.bytearray.ByteArray;
 import com.softwareverde.constable.list.List;
 import com.softwareverde.constable.list.mutable.MutableList;
-import com.softwareverde.database.query.parameter.ParameterType;
 import com.softwareverde.database.query.parameter.TypedParameter;
 
 public class Query {
     protected final String _query;
     protected final MutableList<TypedParameter> _parameters = new MutableList<TypedParameter>();
 
-    protected void _setBoolean(final boolean booleanValue) {
-        _parameters.add(new TypedParameter(booleanValue, ParameterType.BOOLEAN));
-    }
-
     protected void _setByteArray(final byte[] bytes) {
-        _parameters.add(new TypedParameter(bytes, ParameterType.BYTE_ARRAY));
+        _parameters.add(new TypedParameter(bytes));
     }
 
     public Query(final String query) {
@@ -24,33 +19,41 @@ public class Query {
 
     public Query setParameter(final Object value) {
         if (value == null) {
-            _parameters.add(new TypedParameter(null, ParameterType.STRING));
+            _parameters.add(TypedParameter.NULL);
+            return this;
+        }
+
+        if (value instanceof Boolean) {
+            _parameters.add(new TypedParameter((Boolean) value));
+        }
+        else if (value instanceof Long) {
+            _parameters.add(new TypedParameter((Long) value));
+        }
+        else if (value instanceof Integer) {
+            _parameters.add(new TypedParameter((Integer) value));
+        }
+        else if (value instanceof Short) {
+            _parameters.add(new TypedParameter((Short) value));
+        }
+        else if (value instanceof Double) {
+            _parameters.add(new TypedParameter((Double) value));
+        }
+        else if (value instanceof Float) {
+            _parameters.add(new TypedParameter((Float) value));
+        }
+        else if (value instanceof byte[]) {
+            _setByteArray((byte[]) value);
+        }
+        else if (value instanceof ByteArray) {
+            _setByteArray(((ByteArray) value).getBytes());
+        }
+        else if (value instanceof TypedParameter) {
+            _parameters.add((TypedParameter) value);
         }
         else {
-            if (value instanceof Boolean) {
-                _setBoolean((Boolean) value);
-            }
-            else if (value instanceof byte[]) {
-                _setByteArray((byte[]) value);
-            }
-            else if (value instanceof ByteArray) {
-                _setByteArray(((ByteArray) value).getBytes());
-            }
-            else {
-                _parameters.add(new TypedParameter(value.toString(), ParameterType.STRING));
-            }
+            _parameters.add(new TypedParameter(value.toString()));
         }
 
-        return this;
-    }
-
-    public Query setParameter(final boolean value) {
-        _setBoolean(value);
-        return this;
-    }
-
-    public Query setParameter(final byte[] bytes) {
-        _setByteArray(bytes);
         return this;
     }
 

@@ -52,6 +52,38 @@ public class JdbcRow implements Row {
         return (String) value.value;
     }
 
+    protected Long _getWholeNumber(final String columnName) {
+        final TypedParameter value = _getValue(columnName);
+        if (value.value == null) { return null; }
+
+        if (value.type == ParameterType.WHOLE_NUMBER) {
+            return ((Long) value.value);
+        }
+        else if (value.type == ParameterType.FLOATING_POINT_NUMBER) {
+            return ((Double) value.value).longValue();
+        }
+        else {
+            final String stringValue = _getString(columnName);
+            return Util.parseLong(stringValue);
+        }
+    }
+
+    protected Double _getFloatingPointNumber(final String columnName) {
+        final TypedParameter value = _getValue(columnName);
+        if (value.value == null) { return null; }
+
+        if (value.type == ParameterType.FLOATING_POINT_NUMBER) {
+            return ((Double) value.value);
+        }
+        else if (value.type == ParameterType.WHOLE_NUMBER) {
+            return ((Long) value.value).doubleValue();
+        }
+        else {
+            final String stringValue = _getString(columnName);
+            return Util.parseDouble(stringValue);
+        }
+    }
+
     /**
      * Returns the column names in order.
      */
@@ -67,38 +99,36 @@ public class JdbcRow implements Row {
 
     @Override
     public Integer getInteger(final String columnName) {
-        final String stringValue = _getString(columnName);
-        return Util.parseInt(stringValue);
+        final Long value = _getWholeNumber(columnName);
+        if (value == null) { return null; }
+
+        return value.intValue();
     }
 
     @Override
     public Long getLong(final String columnName) {
-        final String stringValue = _getString(columnName);
-        return Util.parseLong(stringValue);
+        return _getWholeNumber(columnName);
     }
 
     @Override
     public Float getFloat(final String columnName) {
-        final String stringValue = _getString(columnName);
-        return Util.parseFloat(stringValue);
+        final Double value = _getFloatingPointNumber(columnName);
+        if (value == null) { return null; }
+
+        return value.floatValue();
     }
 
     @Override
     public Double getDouble(final String columnName) {
-        final String stringValue = _getString(columnName);
-        return Util.parseDouble(stringValue);
+        return _getFloatingPointNumber(columnName);
     }
 
     @Override
     public Boolean getBoolean(final String columnName) {
-        final TypedParameter value = _getValue(columnName);
+        final Long value = _getWholeNumber(columnName);
+        if (value == null) { return null; }
 
-        if (value.type != ParameterType.BOOLEAN) {
-            final String stringValue = _getString(columnName);
-            return Util.parseBool(stringValue);
-        }
-
-        return (boolean) value.value;
+        return (value > 0L);
     }
 
     @Override

@@ -5,9 +5,8 @@ import com.softwareverde.constable.list.mutable.MutableList;
 import com.softwareverde.database.DatabaseConnection;
 import com.softwareverde.database.DatabaseException;
 import com.softwareverde.database.query.Query;
-import com.softwareverde.database.row.Row;
-import com.softwareverde.database.query.parameter.ParameterType;
 import com.softwareverde.database.query.parameter.TypedParameter;
+import com.softwareverde.database.row.Row;
 
 import java.sql.*;
 
@@ -26,8 +25,8 @@ public class MysqlMemoryDatabaseConnection implements DatabaseConnection<Connect
         if (parameters == null) { return null; }
 
         final TypedParameter[] typedParameters = new TypedParameter[parameters.length];
-        for (int i=0; i<parameters.length; ++i) {
-            typedParameters[i] = new TypedParameter(parameters[i], ParameterType.STRING);
+        for (int i = 0; i < parameters.length; ++i) {
+            typedParameters[i] = new TypedParameter(parameters[i]);
         }
         return typedParameters;
     }
@@ -63,9 +62,12 @@ public class MysqlMemoryDatabaseConnection implements DatabaseConnection<Connect
                     case BYTE_ARRAY: {
                         preparedStatement.setBytes(i + 1, (byte[]) parameters[i].value);
                     } break;
-                    case BOOLEAN: {
-                        preparedStatement.setBoolean(i + 1, (Boolean) parameters[i].value);
-                    }
+                    case WHOLE_NUMBER: {
+                        preparedStatement.setLong(i + 1, (Long) parameters[i].value);
+                    } break;
+                    case FLOATING_POINT_NUMBER: {
+                        preparedStatement.setDouble(i + 1, (Double) parameters[i].value);
+                    } break;
                 }
             }
         }

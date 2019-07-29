@@ -1,7 +1,6 @@
 package com.softwareverde.database.row;
 
 import com.softwareverde.database.DatabaseException;
-import com.softwareverde.database.query.parameter.ParameterType;
 import com.softwareverde.database.query.parameter.TypedParameter;
 
 import java.sql.ResultSet;
@@ -23,6 +22,33 @@ public class JdbcRowFactory implements RowFactory {
         }
     }
 
+    // NOTE: Types.ROWID is intentionally treated as a String...
+    protected static Boolean isWholeNumberType(final Integer sqlDataType) {
+        switch (sqlDataType) {
+            case Types.BIGINT:
+            case Types.INTEGER:
+            case Types.SMALLINT:
+            case Types.TINYINT:
+            case Types.BOOLEAN:
+            case Types.BIT: {
+                return true;
+            }
+            default: { return false; }
+        }
+    }
+
+    // NOTE: Types.NUMERIC and Types.DECIMAL are fixed-precision types, and are therefore stored internally as strings in order to maintain the precision...
+    protected static Boolean isFloatingPointNumberType(final Integer sqlDataType) {
+        switch (sqlDataType) {
+            case Types.FLOAT:
+            case Types.DOUBLE:
+            case Types.REAL: {
+                return true;
+            }
+            default: { return false; }
+        }
+    }
+
     public JdbcRow fromResultSet(final ResultSet resultSet) throws DatabaseException {
         final JdbcRow jdbcRow = new JdbcRow();
 
@@ -31,18 +57,25 @@ public class JdbcRowFactory implements RowFactory {
             for (int i = 0; i < metaData.getColumnCount(); ++i) {
                 final int columnIndex = (i + 1);
                 final Integer sqlDataType = metaData.getColumnType(columnIndex);
-                final Boolean isBinaryType = JdbcRowFactory.isBinaryType(sqlDataType);
 
                 final String columnName = metaData.getColumnLabel(columnIndex).toLowerCase();
                 final TypedParameter typedValue;
                 {
-                    if (isBinaryType) {
+                    if (JdbcRowFactory.isWholeNumberType(sqlDataType)) {
+                        final Long longValue = resultSet.getLong(columnIndex);
+                        typedValue = new TypedParameter(longValue);
+                    }
+                    else if (JdbcRowFactory.isBinaryType(sqlDataType)) {
                         final byte[] bytes = resultSet.getBytes(columnIndex);
-                        typedValue = new TypedParameter(bytes, ParameterType.BYTE_ARRAY);
+                        typedValue = new TypedParameter(bytes);
+                    }
+                    else if (JdbcRowFactory.isFloatingPointNumberType(sqlDataType)) {
+                        final Double doubleValue = resultSet.getDouble(columnIndex);
+                        typedValue = new TypedParameter(doubleValue);
                     }
                     else {
                         final String stringValue = resultSet.getString(columnIndex);
-                        typedValue = new TypedParameter(stringValue, ParameterType.STRING);
+                        typedValue = new TypedParameter(stringValue);
                     }
                 }
 
