@@ -1,4 +1,4 @@
-package com.softwareverde.database;
+package com.softwareverde.database.row;
 
 import java.util.List;
 
@@ -12,5 +12,4 @@ public interface Row {
     Double getDouble(String columnName);
     Boolean getBoolean(String columnName);
     byte[] getBytes(String columnName);
-
 }

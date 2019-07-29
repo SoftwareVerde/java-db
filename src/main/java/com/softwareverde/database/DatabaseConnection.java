@@ -1,6 +1,8 @@
 package com.softwareverde.database;
 
 import com.softwareverde.constable.list.List;
+import com.softwareverde.database.query.Query;
+import com.softwareverde.database.row.Row;
 
 public interface DatabaseConnection<T> extends AutoCloseable {
 

@@ -2,6 +2,8 @@ package com.softwareverde.database.transaction;
 
 import com.softwareverde.database.*;
 import com.softwareverde.database.memory.mysql.MysqlMemoryDatabase;
+import com.softwareverde.database.query.Query;
+import com.softwareverde.database.row.Row;
 import com.softwareverde.util.Container;
 import org.junit.After;
 import org.junit.Assert;

@@ -1,9 +1,9 @@
 group 'com.softwareverde'
-version '3.0.0'
+version '4.0.0'
 
 apply plugin: 'java'
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 
 task makeJar(type: Jar) {
     manifest {
@@ -20,8 +20,8 @@ repositories {
 }
 
 dependencies {
-    compile group: 'com.github.softwareverde', name: 'java-util', version: 'v1.2.4'
-    compile group: 'com.github.softwareverde', name: 'java-constable', version: 'v0.3.3'
+    compile group: 'com.github.softwareverde', name: 'java-util', version: 'v1.3.2'
+    compile group: 'com.github.softwareverde', name: 'java-constable', version: 'v0.4.3'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'com.h2database', name: 'h2', version: '1.4.192'
@@ -51,4 +51,23 @@ tasks.withType(Test) {
             }
         }
     }
+}
+
+tasks.withType(Javadoc) {
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
 }

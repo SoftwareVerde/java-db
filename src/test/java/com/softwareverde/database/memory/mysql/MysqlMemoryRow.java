@@ -1,6 +1,6 @@
 package com.softwareverde.database.memory.mysql;
 
-import com.softwareverde.database.Row;
+import com.softwareverde.database.row.Row;
 import com.softwareverde.util.StringUtil;
 import com.softwareverde.util.Util;
 

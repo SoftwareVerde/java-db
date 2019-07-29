@@ -1,4 +1,4 @@
-package com.softwareverde.database;
+package com.softwareverde.database.query;
 
 import com.softwareverde.constable.bytearray.ByteArray;
 import com.softwareverde.constable.list.List;
