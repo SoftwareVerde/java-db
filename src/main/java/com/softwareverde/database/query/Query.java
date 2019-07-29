@@ -1,13 +1,14 @@
 package com.softwareverde.database.query;
 
 import com.softwareverde.constable.bytearray.ByteArray;
-import com.softwareverde.constable.list.List;
-import com.softwareverde.constable.list.mutable.MutableList;
 import com.softwareverde.database.query.parameter.TypedParameter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Query {
     protected final String _query;
-    protected final MutableList<TypedParameter> _parameters = new MutableList<TypedParameter>();
+    protected final List<TypedParameter> _parameters = new ArrayList<TypedParameter>();
 
     protected void _setByteArray(final byte[] bytes) {
         _parameters.add(new TypedParameter(bytes));
@@ -58,7 +59,7 @@ public class Query {
     }
 
     public List<TypedParameter> getParameters() {
-        return _parameters;
+        return new ArrayList<TypedParameter>(_parameters);
     }
 
     public String getQueryString() {

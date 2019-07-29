@@ -58,13 +58,11 @@ tasks.withType(Javadoc) {
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-    // archiveFileName = project.name + '-' + version + '-sources.jar'
     archiveClassifier = 'sources'
     from sourceSets.main.allSource
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    // archiveFileName = project.name + '-' + version + '-javadoc.jar'
     archiveClassifier = 'javadoc'
     from javadoc.destinationDir
 }
