@@ -7,7 +7,7 @@ public class BatchedInsertQuery extends Query {
 
     @Override
     public String getQueryString() {
-        final Integer parameterCount = _parameters.getSize();
+        final Integer parameterCount = _parameters.size();
         final Integer parameterCountPerBatch = (_query.length() - _query.replace("?", "").length());
         final int batchCount = (parameterCount / parameterCountPerBatch);
 

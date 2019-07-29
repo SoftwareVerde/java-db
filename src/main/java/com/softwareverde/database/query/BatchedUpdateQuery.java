@@ -11,7 +11,7 @@ public class BatchedUpdateQuery extends Query {
     @Override
     public String getQueryString() {
         // UPDATE t SET v = x WHERE z IN (?)
-        final Integer parameterCount = _parameters.getSize();
+        final Integer parameterCount = _parameters.size();
         final Integer nonInClauseParameterCount = (_query.length() - _query.replace("?", "").length()) - 1;
         final int batchCount = (parameterCount - nonInClauseParameterCount);
 
