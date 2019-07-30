@@ -1,7 +1,15 @@
 package com.softwareverde.database.query;
 
 public class BatchedInsertQuery extends Query {
+    protected BatchedInsertQuery(final Query query, final Boolean shouldConsumeQuery) {
+        super(query, shouldConsumeQuery);
+    }
+
     public BatchedInsertQuery(final String query) {
+        super(query);
+    }
+
+    public BatchedInsertQuery(final Query query) {
         super(query);
     }
 

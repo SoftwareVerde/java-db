@@ -9,10 +9,26 @@ import java.util.List;
 
 public class Query {
     protected final String _query;
-    protected final List<TypedParameter> _parameters = new ArrayList<TypedParameter>();
+    protected final List<TypedParameter> _parameters;
+
+    protected Query(final Query query, final Boolean shouldConsumeQuery) {
+        if (shouldConsumeQuery) {
+            _query = query._query;
+            _parameters = query._parameters;
+        }
+        else {
+            _query = query._query;
+            _parameters = new ArrayList<TypedParameter>(query._parameters);
+        }
+    }
+
+    public Query(final Query query) {
+        this(query, false);
+    }
 
     public Query(final String query) {
         _query = query;
+        _parameters = new ArrayList<TypedParameter>();
     }
 
     public Query setParameter(final Boolean value) {

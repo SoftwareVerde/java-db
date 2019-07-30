@@ -4,7 +4,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BatchedUpdateQuery extends Query {
+    protected BatchedUpdateQuery(final Query query, final Boolean shouldConsumeQuery) {
+        super(query, shouldConsumeQuery);
+    }
+
     public BatchedUpdateQuery(final String query) {
+        super(query);
+    }
+
+    public BatchedUpdateQuery(final Query query) {
         super(query);
     }
 
