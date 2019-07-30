@@ -2,6 +2,7 @@ package com.softwareverde.database.transaction;
 
 import com.softwareverde.database.DatabaseException;
 
-public interface DatabaseTransaction<T> {
-    void execute(final DatabaseRunnable<T> databaseRunnable) throws DatabaseException;
+public interface DatabaseTransaction<ConnectionType> {
+    void execute(final DatabaseRunnable<ConnectionType> databaseRunnable) throws DatabaseException;
+    <ReturnType> ReturnType call(final DatabaseCallable<ReturnType, ConnectionType> databaseCallable) throws DatabaseException;
 }

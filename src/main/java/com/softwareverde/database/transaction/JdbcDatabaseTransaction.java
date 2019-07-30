@@ -5,6 +5,7 @@ import com.softwareverde.database.DatabaseConnectionFactory;
 import com.softwareverde.database.DatabaseException;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 public class JdbcDatabaseTransaction implements DatabaseTransaction<Connection> {
     protected final DatabaseConnectionFactory<Connection> _databaseConnectionFactory;
@@ -27,7 +28,27 @@ public class JdbcDatabaseTransaction implements DatabaseTransaction<Connection> 
                 connection.rollback();
                 throw exception;
             }
+        }
+        catch (final Exception exception) {
+            throw new DatabaseException("Unable to complete query.", exception);
+        }
+    }
 
+    @Override
+    public <T> T call(final DatabaseCallable<T, Connection> databaseConnectedCallable) throws DatabaseException {
+        try (final DatabaseConnection<Connection> databaseConnection = _databaseConnectionFactory.newConnection()) {
+            final Connection connection = databaseConnection.getRawConnection();
+
+            try {
+                connection.setAutoCommit(false);
+                final T returnValue = databaseConnectedCallable.call(databaseConnection);
+                connection.commit();
+                return returnValue;
+            }
+            catch (final SQLException exception) {
+                connection.rollback();
+                throw exception;
+            }
         }
         catch (final Exception exception) {
             throw new DatabaseException("Unable to complete query.", exception);
