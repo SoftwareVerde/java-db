@@ -1,7 +1,5 @@
 package com.softwareverde.database.memory.mysql;
 
-import com.softwareverde.constable.list.List;
-import com.softwareverde.constable.list.mutable.MutableList;
 import com.softwareverde.database.DatabaseConnection;
 import com.softwareverde.database.DatabaseException;
 import com.softwareverde.database.query.Query;
@@ -9,12 +7,14 @@ import com.softwareverde.database.query.parameter.TypedParameter;
 import com.softwareverde.database.row.Row;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MysqlMemoryDatabaseConnection implements DatabaseConnection<Connection> {
     private final Connection _connection;
 
     private TypedParameter[] _getTypedParametersAsArray(final List<TypedParameter> typedParameters) {
-        final TypedParameter[] typedParameterArray = new TypedParameter[typedParameters.getSize()];
+        final TypedParameter[] typedParameterArray = new TypedParameter[typedParameters.size()];
         for (int i = 0; i < typedParameterArray.length; ++i) {
             typedParameterArray[i] = typedParameters.get(i);
         }
@@ -33,7 +33,7 @@ public class MysqlMemoryDatabaseConnection implements DatabaseConnection<Connect
 
     private List<Row> _query(final String query, final TypedParameter[] typedParameters) throws DatabaseException {
         try {
-            final MutableList<Row> results = new MutableList<Row>();
+            final List<Row> results = new ArrayList<Row>();
             try (final PreparedStatement preparedStatement = _prepareStatement(query, typedParameters);
                  final ResultSet resultSet = preparedStatement.executeQuery() ) {
 

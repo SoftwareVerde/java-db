@@ -1,11 +1,12 @@
 package com.softwareverde.database;
 
-import com.softwareverde.constable.list.List;
 import com.softwareverde.database.query.Query;
 import com.softwareverde.database.query.parameter.ParameterType;
 import com.softwareverde.database.query.parameter.TypedParameter;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.List;
 
 public class QueryTests {
 
