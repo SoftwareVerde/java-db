@@ -1,7 +1,8 @@
-package com.softwareverde.database.row;
+package com.softwareverde.database.row.jdbc;
 
 import com.softwareverde.database.query.parameter.ParameterType;
 import com.softwareverde.database.query.parameter.TypedParameter;
+import com.softwareverde.database.row.Row;
 import com.softwareverde.util.Util;
 
 import java.nio.charset.Charset;

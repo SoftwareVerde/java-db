@@ -1,4 +1,4 @@
-package com.softwareverde.database.transaction;
+package com.softwareverde.database.transaction.jdbc;
 
 import com.softwareverde.database.DatabaseConnection;
 import com.softwareverde.database.DatabaseException;

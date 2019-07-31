@@ -1,7 +1,8 @@
-package com.softwareverde.database.row;
+package com.softwareverde.database.row.jdbc;
 
 import com.softwareverde.database.DatabaseException;
 import com.softwareverde.database.query.parameter.TypedParameter;
+import com.softwareverde.database.row.RowFactory;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -62,20 +63,22 @@ public class JdbcRowFactory implements RowFactory {
                 final TypedParameter typedValue;
                 {
                     if (JdbcRowFactory.isWholeNumberType(sqlDataType)) {
-                        final Long longValue = resultSet.getLong(columnIndex);
-                        typedValue = new TypedParameter(longValue);
+                        final long longValue = resultSet.getLong(columnIndex); // NOTE: ResultSet::getLong returns 0L if null. Must use ResultSet::wasNull.
+                        final boolean wasNull = resultSet.wasNull();
+                        typedValue = (wasNull ? TypedParameter.NULL : new TypedParameter(longValue));
                     }
                     else if (JdbcRowFactory.isBinaryType(sqlDataType)) {
                         final byte[] bytes = resultSet.getBytes(columnIndex);
-                        typedValue = new TypedParameter(bytes);
+                        typedValue = ((bytes == null) ? TypedParameter.NULL : new TypedParameter(bytes));
                     }
                     else if (JdbcRowFactory.isFloatingPointNumberType(sqlDataType)) {
-                        final Double doubleValue = resultSet.getDouble(columnIndex);
-                        typedValue = new TypedParameter(doubleValue);
+                        final double doubleValue = resultSet.getDouble(columnIndex); // NOTE: ResultSet::getDouble returns 0D if null. Must use ResultSet::wasNull.
+                        final boolean wasNull = resultSet.wasNull();
+                        typedValue = (wasNull ? TypedParameter.NULL : new TypedParameter(doubleValue));
                     }
                     else {
                         final String stringValue = resultSet.getString(columnIndex);
-                        typedValue = new TypedParameter(stringValue);
+                        typedValue = ((stringValue == null) ? TypedParameter.NULL : new TypedParameter(stringValue));
                     }
                 }
 

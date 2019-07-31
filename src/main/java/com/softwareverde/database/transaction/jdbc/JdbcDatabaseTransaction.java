@@ -1,8 +1,9 @@
-package com.softwareverde.database.transaction;
+package com.softwareverde.database.transaction.jdbc;
 
 import com.softwareverde.database.DatabaseConnection;
 import com.softwareverde.database.DatabaseConnectionFactory;
 import com.softwareverde.database.DatabaseException;
+import com.softwareverde.database.transaction.DatabaseTransaction;
 
 import java.sql.Connection;
 import java.sql.SQLException;
