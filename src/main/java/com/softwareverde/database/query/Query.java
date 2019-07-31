@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Query {
+    public static final TypedParameter NULL = TypedParameter.NULL;
+
     protected final String _query;
     protected final List<TypedParameter> _parameters;
 
@@ -32,47 +34,47 @@ public class Query {
     }
 
     public Query setParameter(final Boolean value) {
-        _parameters.add((value != null) ? new TypedParameter(value) : TypedParameter.NULL);
+        _parameters.add((value != null) ? new TypedParameter(value) : NULL);
         return this;
     }
 
     public Query setParameter(final Long value) {
-        _parameters.add((value != null) ? new TypedParameter(value) : TypedParameter.NULL);
+        _parameters.add((value != null) ? new TypedParameter(value) : NULL);
         return this;
     }
 
     public Query setParameter(final Integer value) {
-        _parameters.add((value != null) ? new TypedParameter(value) : TypedParameter.NULL);
+        _parameters.add((value != null) ? new TypedParameter(value) : NULL);
         return this;
     }
 
     public Query setParameter(final Short value) {
-        _parameters.add((value != null) ? new TypedParameter(value) : TypedParameter.NULL);
+        _parameters.add((value != null) ? new TypedParameter(value) : NULL);
         return this;
     }
 
     public Query setParameter(final Double value) {
-        _parameters.add((value != null) ? new TypedParameter(value) : TypedParameter.NULL);
+        _parameters.add((value != null) ? new TypedParameter(value) : NULL);
         return this;
     }
 
     public Query setParameter(final Float value) {
-        _parameters.add((value != null) ? new TypedParameter(value) : TypedParameter.NULL);
+        _parameters.add((value != null) ? new TypedParameter(value) : NULL);
         return this;
     }
 
     public Query setParameter(final byte[] value) {
-        _parameters.add((value != null) ? new TypedParameter(value) : TypedParameter.NULL);
+        _parameters.add((value != null) ? new TypedParameter(value) : NULL);
         return this;
     }
 
     public Query setParameter(final ByteArray value) {
-        _parameters.add((value != null) ? new TypedParameter(value.getBytes()) : TypedParameter.NULL);
+        _parameters.add((value != null) ? new TypedParameter(value.getBytes()) : NULL);
         return this;
     }
 
     public Query setParameter(final Identifier value) {
-        _parameters.add((value != null) ? new TypedParameter(value.longValue()) : TypedParameter.NULL);
+        _parameters.add((value != null) ? new TypedParameter(value.longValue()) : NULL);
         return this;
     }
 
@@ -82,7 +84,12 @@ public class Query {
     }
 
     public Query setParameter(final String value) {
-        _parameters.add((value != null) ? new TypedParameter(value) : TypedParameter.NULL);
+        _parameters.add((value != null) ? new TypedParameter(value) : NULL);
+        return this;
+    }
+
+    public Query setNullParameter() {
+        _parameters.add(NULL);
         return this;
     }
 

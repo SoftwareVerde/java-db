@@ -26,7 +26,7 @@ public class JdbcDatabaseConnection implements DatabaseConnection<Connection>, A
         if (parameters == null) { return new TypedParameter[0]; }
 
         final TypedParameter[] typedParameters = new TypedParameter[parameters.length];
-        for (int i=0; i<parameters.length; ++i) {
+        for (int i = 0; i < parameters.length; ++i) {
             typedParameters[i] = new TypedParameter(parameters[i]);
         }
         return typedParameters;
