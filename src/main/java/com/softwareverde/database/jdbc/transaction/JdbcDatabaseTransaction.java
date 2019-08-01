@@ -1,4 +1,4 @@
-package com.softwareverde.database.transaction.jdbc;
+package com.softwareverde.database.jdbc.transaction;
 
 import com.softwareverde.database.DatabaseConnection;
 import com.softwareverde.database.DatabaseConnectionFactory;

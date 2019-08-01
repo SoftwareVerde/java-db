@@ -1,8 +1,8 @@
 package com.softwareverde.database.transaction;
 
 import com.softwareverde.database.DatabaseException;
-import com.softwareverde.database.transaction.jdbc.DatabaseCallable;
-import com.softwareverde.database.transaction.jdbc.DatabaseRunnable;
+import com.softwareverde.database.jdbc.transaction.DatabaseCallable;
+import com.softwareverde.database.jdbc.transaction.DatabaseRunnable;
 
 public interface DatabaseTransaction<ConnectionType> {
     void execute(final DatabaseRunnable<ConnectionType> databaseRunnable) throws DatabaseException;

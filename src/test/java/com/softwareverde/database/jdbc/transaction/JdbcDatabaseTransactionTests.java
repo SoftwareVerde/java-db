@@ -1,4 +1,4 @@
-package com.softwareverde.database.transaction.jdbc;
+package com.softwareverde.database.jdbc.transaction;
 
 import com.softwareverde.database.Database;
 import com.softwareverde.database.DatabaseConnection;
@@ -7,7 +7,6 @@ import com.softwareverde.database.memory.mysql.MysqlMemoryDatabase;
 import com.softwareverde.database.query.Query;
 import com.softwareverde.database.row.Row;
 import com.softwareverde.database.transaction.DatabaseTransaction;
-import com.softwareverde.database.transaction.jdbc.DatabaseRunnable;
 import com.softwareverde.util.Container;
 import org.junit.After;
 import org.junit.Assert;

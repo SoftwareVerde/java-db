@@ -1,4 +1,4 @@
-package com.softwareverde.database.row.jdbc;
+package com.softwareverde.database.jdbc.row;
 
 import com.softwareverde.database.query.parameter.ParameterType;
 import com.softwareverde.database.query.parameter.TypedParameter;

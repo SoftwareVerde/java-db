@@ -1,10 +1,10 @@
-package com.softwareverde.database.connection.jdbc;
+package com.softwareverde.database.jdbc;
 
 import com.softwareverde.database.DatabaseConnection;
 import com.softwareverde.database.DatabaseException;
+import com.softwareverde.database.jdbc.row.JdbcRowFactory;
 import com.softwareverde.database.query.Query;
 import com.softwareverde.database.query.parameter.TypedParameter;
-import com.softwareverde.database.row.jdbc.JdbcRowFactory;
 import com.softwareverde.database.row.Row;
 import com.softwareverde.database.row.RowFactory;
 import com.softwareverde.util.Util;
