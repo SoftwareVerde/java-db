@@ -1,8 +1,10 @@
 package com.softwareverde.database.query;
 
+import com.softwareverde.database.query.parameter.ParameterFactory;
+
 public class BatchedInsertQuery extends Query {
-    protected BatchedInsertQuery(final Query query, final Boolean shouldConsumeQuery) {
-        super(query, shouldConsumeQuery);
+    protected BatchedInsertQuery(final Query query, final Boolean shouldConsumeQuery, final ParameterFactory parameterFactory) {
+        super(query, shouldConsumeQuery, parameterFactory);
     }
 
     public BatchedInsertQuery(final String query) {
@@ -15,7 +17,7 @@ public class BatchedInsertQuery extends Query {
 
     @Override
     public String getQueryString() {
-        final Integer parameterCount = _parameters.size();
+        final Integer parameterCount = _parameters.getCount();
         final Integer parameterCountPerBatch = (_query.length() - _query.replace("?", "").length());
         final int batchCount = (parameterCount / parameterCountPerBatch);
 

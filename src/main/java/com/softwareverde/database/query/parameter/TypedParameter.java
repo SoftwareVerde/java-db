@@ -23,7 +23,7 @@ public class TypedParameter {
      */
     public TypedParameter(final Boolean value) {
         this.type = ParameterType.WHOLE_NUMBER;
-        this.value = (value ? TRUE : FALSE);
+        this.value = (value != null ? (value ? TRUE : FALSE) : null);
     }
 
     /**

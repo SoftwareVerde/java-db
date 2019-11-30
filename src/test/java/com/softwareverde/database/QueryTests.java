@@ -1,11 +1,13 @@
 package com.softwareverde.database;
 
 import com.softwareverde.database.query.Query;
+import com.softwareverde.database.query.ValueExtractor;
 import com.softwareverde.database.query.parameter.ParameterType;
 import com.softwareverde.database.query.parameter.TypedParameter;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class QueryTests {
@@ -56,5 +58,86 @@ public class QueryTests {
 
         Assert.assertEquals(7D, parameterValues.get(7).value);
         Assert.assertEquals(ParameterType.FLOATING_POINT_NUMBER, parameterValues.get(7).type);
+    }
+
+    @Test
+    public void should_create_query_with_in_clause() {
+        // Setup
+        final Query query = new Query("SELECT * FROM rows WHERE value = ? AND id IN(?)");
+
+        final int itemCount = 3;
+        final List<String> items = new ArrayList<String>(itemCount);
+        for (int i = 0; i < itemCount; ++i) {
+            items.add("" + i);
+        }
+
+        // Action
+        query.setParameter("value");
+        query.setInClauseParameters(items, ValueExtractor.STRING);
+        final String queryString = query.getQueryString();
+        final List<TypedParameter> parameters = query.getParameters();
+
+        // Assert
+        Assert.assertEquals("SELECT * FROM rows WHERE value = ? AND id IN (?, ?, ?)", queryString);
+        Assert.assertEquals((itemCount + 1), parameters.size());
+        Assert.assertEquals("value", parameters.get(0).value);
+        Assert.assertEquals("0", parameters.get(1).value);
+        Assert.assertEquals("1", parameters.get(2).value);
+        Assert.assertEquals("2", parameters.get(3).value);
+    }
+
+    @Test
+    public void should_create_query_with_in_clause_using_null() {
+        // Setup
+        final Query query = new Query("SELECT * FROM rows WHERE value = ? AND id IN(?)");
+
+        // Action
+        query.setParameter("value");
+        query.setInClauseParameters(null);
+        final String queryString = query.getQueryString();
+        final List<TypedParameter> parameters = query.getParameters();
+
+        // Assert
+        Assert.assertEquals("SELECT * FROM rows WHERE value = ? AND id IN (?)", queryString);
+        Assert.assertEquals(2, parameters.size());
+        Assert.assertEquals("value", parameters.get(0).value);
+        Assert.assertEquals(TypedParameter.NULL, parameters.get(1));
+    }
+
+    @Test
+    public void should_create_query_with_multiple_in_clauses() {
+        // Setup
+        final Query query = new Query("SELECT * FROM rows WHERE value = ? AND ( id IN(?) OR id IN (?) )");
+
+        final int firstItemCount = 3;
+        final List<String> firstItems = new ArrayList<String>(firstItemCount);
+        for (int i = 0; i < firstItemCount; ++i) {
+            firstItems.add("" + i);
+        }
+
+        final int secondItemCount = 4;
+        final List<String> secondItems = new ArrayList<String>(secondItemCount);
+        for (int i = 0; i < secondItemCount; ++i) {
+            secondItems.add("" + i);
+        }
+
+        // Action
+        query.setParameter("value");
+        query.setInClauseParameters(firstItems, ValueExtractor.STRING);
+        query.setInClauseParameters(secondItems, ValueExtractor.STRING);
+        final String queryString = query.getQueryString();
+        final List<TypedParameter> parameters = query.getParameters();
+
+        // Assert
+        Assert.assertEquals("SELECT * FROM rows WHERE value = ? AND ( id IN (?, ?, ?) OR id IN (?, ?, ?, ?) )", queryString);
+        Assert.assertEquals((firstItemCount + secondItemCount + 1), parameters.size());
+        Assert.assertEquals("value", parameters.get(0).value);
+        Assert.assertEquals("0", parameters.get(1).value);
+        Assert.assertEquals("1", parameters.get(2).value);
+        Assert.assertEquals("2", parameters.get(3).value);
+        Assert.assertEquals("0", parameters.get(4).value);
+        Assert.assertEquals("1", parameters.get(5).value);
+        Assert.assertEquals("2", parameters.get(6).value);
+        Assert.assertEquals("3", parameters.get(7).value);
     }
 }
