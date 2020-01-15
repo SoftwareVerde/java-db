@@ -1,9 +1,12 @@
 package com.softwareverde.database;
 
+import com.softwareverde.constable.list.mutable.MutableList;
 import com.softwareverde.database.query.Query;
 import com.softwareverde.database.query.ValueExtractor;
+import com.softwareverde.database.query.parameter.InClauseParameter;
 import com.softwareverde.database.query.parameter.ParameterType;
 import com.softwareverde.database.query.parameter.TypedParameter;
+import com.softwareverde.util.Tuple;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -139,5 +142,33 @@ public class QueryTests {
         Assert.assertEquals("1", parameters.get(5).value);
         Assert.assertEquals("2", parameters.get(6).value);
         Assert.assertEquals("3", parameters.get(7).value);
+    }
+
+    @Test
+    public void should_create_query_of_multiple_tuple_pairs() {
+        // Setup
+        final Query query = new Query("SELECT id FROM table WHERE (value0, value1) IN (?)");
+
+        final ValueExtractor<Tuple<String, String>> stringTupleExtractor = new ValueExtractor<Tuple<String, String>>() {
+            @Override
+            public InClauseParameter extractValues(final Tuple<String, String> tuple) {
+                final TypedParameter typedParameter0 = new TypedParameter(tuple.first);
+                final TypedParameter typedParameter1 = new TypedParameter(tuple.second);
+                return new InClauseParameter(typedParameter0, typedParameter1);
+            }
+        };
+
+        final MutableList<Tuple<String, String>> values = new MutableList<Tuple<String, String>>();
+        for (int i = 0; i < 3; ++i) {
+            values.add(new Tuple<String, String>("Value0-" + i, "Value1-" + i));
+        }
+
+        // Action
+        query.setInClauseParameters(values, stringTupleExtractor);
+
+        final String queryString = query.getQueryString();
+
+        // Assert
+        Assert.assertEquals("SELECT id FROM table WHERE (value0, value1) IN ((?,?), (?,?), (?,?))", queryString);
     }
 }

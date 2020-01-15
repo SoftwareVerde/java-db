@@ -56,11 +56,8 @@ public class DatabaseUtil {
 //        return _createInClause(list, keyMap);
 //    }
 
-    public static <T, V> List<V> sortMappedRows(final java.util.List<Row> rows, final List<T> rowOrder, final Map<T, V> keyMap) {
-        final Integer itemCount = rows.size();
-        if (! Util.areEqual(itemCount, rowOrder.getSize())) { return null; }
-
-        final ImmutableListBuilder<V> lockingScriptsBuilder = new ImmutableListBuilder<V>(itemCount);
+    public static <T, V> List<V> sortMappedRows(final List<T> rowOrder, final Map<T, V> keyMap) {
+        final ImmutableListBuilder<V> lockingScriptsBuilder = new ImmutableListBuilder<V>();
         for (final T key : rowOrder) {
             final V value = keyMap.get(key);
             lockingScriptsBuilder.add(value);

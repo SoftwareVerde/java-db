@@ -15,21 +15,49 @@ import java.util.regex.Pattern;
 
 public class Query {
     public static final TypedParameter NULL = TypedParameter.NULL;
+    public static final String NULL_STRING = "NULL";
 
-    protected static String buildInClause(final Integer parameterCount) {
+    protected static StringBuilder buildParenthesisList(final Integer parameterCount) {
         final StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("IN (");
 
         if (parameterCount > 0) {
+            stringBuilder.append("(");
             String separator = "";
             for (int i = 0; i < parameterCount; ++i) {
                 stringBuilder.append(separator);
                 stringBuilder.append("?");
+                separator = ",";
+            }
+            stringBuilder.append(")");
+        }
+        else {
+            stringBuilder.append(NULL_STRING);
+        }
+
+        return stringBuilder;
+    }
+
+    protected static String buildInClause(final List<InClauseParameter> inClauseParameters) {
+        final StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("IN (");
+
+        if (inClauseParameters.getCount() > 0) {
+            String separator = "";
+            for (final InClauseParameter inClauseParameter : inClauseParameters) {
+                stringBuilder.append(separator);
+                if (inClauseParameter.getType() == InClauseParameter.Type.TUPLE) {
+                    final Integer parameterCount = inClauseParameter.getParameterCount();
+                    stringBuilder.append(Query.buildParenthesisList(parameterCount));
+                }
+                else {
+                    stringBuilder.append("?");
+                }
+
                 separator = ", ";
             }
         }
         else {
-            stringBuilder.append("NULL");
+            stringBuilder.append(NULL_STRING);
         }
 
         stringBuilder.append(")");
@@ -214,8 +242,8 @@ public class Query {
                     break;
                 }
 
-                final List<?> inClauseValues = _inClauseParameters.get(matchCount);
-                final String inClause = Query.buildInClause(inClauseValues.getCount());
+                final List<InClauseParameter> inClauseValues = _inClauseParameters.get(matchCount);
+                final String inClause = Query.buildInClause(inClauseValues);
                 matcher.appendReplacement(stringBuffer, inClause);
                 matchCount += 1;
             }
