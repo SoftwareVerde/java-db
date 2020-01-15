@@ -7,4 +7,4 @@ import java.sql.Connection;
 /**
  * Convenience interface to avoid specifying the generic type everywhere when using JDBC.
  */
-public interface JdbcDatabase extends Database<Connection> { }
+public interface JdbcDatabase extends Database<Connection>, JdbcDatabaseConnectionFactory { }
