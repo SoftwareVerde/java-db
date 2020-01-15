@@ -1,11 +1,13 @@
 package com.softwareverde.database.query;
 
+import com.softwareverde.database.query.parameter.ParameterFactory;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BatchedUpdateQuery extends Query {
-    protected BatchedUpdateQuery(final Query query, final Boolean shouldConsumeQuery) {
-        super(query, shouldConsumeQuery);
+    protected BatchedUpdateQuery(final Query query, final Boolean shouldConsumeQuery, final ParameterFactory parameterFactory) {
+        super(query, shouldConsumeQuery, parameterFactory);
     }
 
     public BatchedUpdateQuery(final String query) {
@@ -19,7 +21,7 @@ public class BatchedUpdateQuery extends Query {
     @Override
     public String getQueryString() {
         // UPDATE t SET v = x WHERE z IN (?)
-        final Integer parameterCount = _parameters.size();
+        final Integer parameterCount = _parameters.getCount();
         final Integer nonInClauseParameterCount = (_query.length() - _query.replace("?", "").length()) - 1;
         final int batchCount = (parameterCount - nonInClauseParameterCount);
 
