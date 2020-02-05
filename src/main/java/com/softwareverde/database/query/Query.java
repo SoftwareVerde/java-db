@@ -259,7 +259,7 @@ public class Query {
 
     public java.util.List<TypedParameter> getParameters() {
         if (_inClauseParameters.isEmpty()) {
-            final java.util.List<TypedParameter> parameters = new ArrayList<TypedParameter>(_parameters.getSize());
+            final java.util.List<TypedParameter> parameters = new ArrayList<TypedParameter>(_parameters.getCount());
             for (final TypedParameter typedParameter : _parameters) {
                 parameters.add(typedParameter);
             }
