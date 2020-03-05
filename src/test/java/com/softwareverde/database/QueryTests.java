@@ -167,8 +167,10 @@ public class QueryTests {
         query.setInClauseParameters(values, stringTupleExtractor);
 
         final String queryString = query.getQueryString();
+        final List<TypedParameter> parameters = query.getParameters();
 
         // Assert
         Assert.assertEquals("SELECT id FROM table WHERE (value0, value1) IN ((?,?), (?,?), (?,?))", queryString);
+        Assert.assertEquals(6, parameters.size());
     }
 }

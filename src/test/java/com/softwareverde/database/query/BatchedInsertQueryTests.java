@@ -14,7 +14,6 @@ public class BatchedInsertQueryTests {
         batchedInsertQuery.setParameter("valueC2");
 
         // Action
-
         final String query = batchedInsertQuery.getQueryString();
 
         // Assert
@@ -35,7 +34,6 @@ public class BatchedInsertQueryTests {
         }
 
         // Action
-
         final String query = batchedInsertQuery.getQueryString();
 
         // Assert
@@ -56,10 +54,28 @@ public class BatchedInsertQueryTests {
         }
 
         // Action
-
         final String query = batchedInsertQuery.getQueryString();
 
         // Assert
         Assert.assertEquals("INSERT INTO table (column0, column1, column2) VALUES (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?)", query);
+    }
+
+    @Test
+    public void should_create_batched_query_supporting_on_duplicate_key_update() {
+        // Setup
+        final int batchSize = 3;
+
+        final BatchedInsertQuery batchedInsertQuery = new BatchedInsertQuery("INSERT INTO table (column0, column1) VALUES (?, ?) ON DUPLICATE KEY UPDATE column1 = NULL");
+
+        for (int i = 0; i < batchSize; ++i) {
+            batchedInsertQuery.setParameter("valueA" + i);
+            batchedInsertQuery.setParameter("valueB" + i);
+        }
+
+        // Action
+        final String query = batchedInsertQuery.getQueryString();
+
+        // Assert
+        Assert.assertEquals("INSERT INTO table (column0, column1) VALUES (?, ?), (?, ?), (?, ?) ON DUPLICATE KEY UPDATE column1 = NULL", query);
     }
 }
