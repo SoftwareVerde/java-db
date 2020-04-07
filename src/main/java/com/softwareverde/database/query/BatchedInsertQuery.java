@@ -86,33 +86,41 @@ public class BatchedInsertQuery extends Query {
             throw new RuntimeException("Invalid parameter count for batched query: " + _query);
         }
 
-        final int writeIndex;
+        final int firstParamParenthesisIndex;
+        final int lastParamParenthesisIndex;
         {
-            final Pattern pattern = BatchedInsertQuery.getMatcher(parameterCountPerBatch);
-            final Matcher matcher = pattern.matcher(_query);
-            if (matcher.find()) {
-                writeIndex = (matcher.start() - 1);
+            final int firstParamIndex = _query.indexOf('?');
+            final int lastParamIndex = _query.lastIndexOf('?');
+
+            {
+                int index = (firstParamIndex - 1);
+                while (_query.charAt(index) != '(') {
+                    index -= 1;
+                }
+                firstParamParenthesisIndex = index;
             }
-            else {
-                writeIndex = _query.length();
+
+            {
+                int index = (lastParamIndex + 1);
+                while (_query.charAt(index) != ')') {
+                    index += 1;
+                }
+                lastParamParenthesisIndex = index;
             }
         }
 
         final StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(_query, 0, writeIndex);
+        stringBuilder.append(_query, 0, firstParamParenthesisIndex);
 
-        for (int i = 1; i < batchCount; ++i) {
-            stringBuilder.append("(");
-            for (int j = 0; j < parameterCountPerBatch; ++j) {
-                stringBuilder.append("?");
-                if (j < parameterCountPerBatch - 1) {
-                    stringBuilder.append(", ");
-                }
-            }
-            stringBuilder.append("), ");
+        String delimiter = "";
+        final String parameterList = _query.substring(firstParamParenthesisIndex, (lastParamParenthesisIndex + 1));
+        for (int i = 0; i < batchCount; ++i) {
+            stringBuilder.append(delimiter);
+            stringBuilder.append(parameterList);
+            delimiter = ", ";
         }
 
-        stringBuilder.append(_query.substring(writeIndex));
+        stringBuilder.append(_query.substring(lastParamParenthesisIndex + 1));
 
         return stringBuilder.toString();
     }

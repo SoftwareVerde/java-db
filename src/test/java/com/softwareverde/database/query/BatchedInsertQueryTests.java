@@ -78,4 +78,42 @@ public class BatchedInsertQueryTests {
         // Assert
         Assert.assertEquals("INSERT INTO table (column0, column1) VALUES (?, ?), (?, ?), (?, ?) ON DUPLICATE KEY UPDATE column1 = NULL", query);
     }
+
+    @Test
+    public void should_create_batched_query_with_static_parameter() {
+        // Setup
+        final int batchSize = 3;
+
+        final BatchedInsertQuery batchedInsertQuery = new BatchedInsertQuery("INSERT INTO table (column0, column1, column2) VALUES (?, ?, 1)");
+
+        for (int i = 0; i < batchSize; ++i) {
+            batchedInsertQuery.setParameter("valueA" + i);
+            batchedInsertQuery.setParameter("valueB" + i);
+        }
+
+        // Action
+        final String query = batchedInsertQuery.getQueryString();
+
+        // Assert
+        Assert.assertEquals("INSERT INTO table (column0, column1, column2) VALUES (?, ?, 1), (?, ?, 1), (?, ?, 1)", query);
+    }
+
+    @Test
+    public void should_create_batched_query_with_batch_size_7_with_static_parameter_and_duplicate_update_clause() {
+        // Setup
+        final int batchSize = 7;
+
+        final BatchedInsertQuery batchedInsertQuery = new BatchedInsertQuery("INSERT INTO table (column0, column1, column2) VALUES (?, 1, ?) ON DUPLICATE KEY UPDATE column1 = VALUE (column1)");
+
+        for (int i = 0; i < batchSize; ++i) {
+            batchedInsertQuery.setParameter("valueA" + i);
+            batchedInsertQuery.setParameter("valueC" + i);
+        }
+
+        // Action
+        final String query = batchedInsertQuery.getQueryString();
+
+        // Assert
+        Assert.assertEquals("INSERT INTO table (column0, column1, column2) VALUES (?, 1, ?), (?, 1, ?), (?, 1, ?), (?, 1, ?), (?, 1, ?), (?, 1, ?), (?, 1, ?) ON DUPLICATE KEY UPDATE column1 = VALUE (column1)", query);
+    }
 }
