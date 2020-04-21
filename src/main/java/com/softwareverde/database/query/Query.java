@@ -16,6 +16,20 @@ import java.util.regex.Pattern;
 public class Query {
     public static final TypedParameter NULL = TypedParameter.NULL;
     public static final String NULL_STRING = "NULL";
+    public static final String TRUE_STRING = "TRUE";
+
+    protected static final Pattern IN_CLAUSE_PATTERN = Pattern.compile("((\\([^()]+\\))|(\\w+))? IN[ ]*\\(\\?\\)");
+    protected static final Pattern TUPLE_PATTERN = Pattern.compile("([^,()\\s]+)");
+
+    protected static class ExtendedInClauseParameters {
+        public final List<InClauseParameter> inClauseParameters;
+        public final Boolean isExtendedInClause;
+
+        public ExtendedInClauseParameters(final List<InClauseParameter> inClauseParameters, final Boolean isExtendedInClause) {
+            this.inClauseParameters = inClauseParameters;
+            this.isExtendedInClause = isExtendedInClause;
+        }
+    }
 
     protected static StringBuilder buildParenthesisList(final Integer parameterCount) {
         final StringBuilder stringBuilder = new StringBuilder();
@@ -64,17 +78,49 @@ public class Query {
         return stringBuilder.toString();
     }
 
+    protected static String buildAndList(final List<String> columnNames) {
+        final StringBuilder stringBuilder = new StringBuilder();
+
+        String separator = "";
+        for (final String columnName : columnNames) {
+            stringBuilder.append(separator);
+            stringBuilder.append(columnName);
+            stringBuilder.append(" = ?");
+            separator = " AND ";
+        }
+
+        return stringBuilder.toString();
+    }
+
+    protected static String buildExpandedWhereInClause(final List<String> columnNames, final Integer tupleCount) {
+        if (tupleCount == 0) { return TRUE_STRING; }
+
+        final StringBuilder stringBuilder = new StringBuilder();
+        String separator = "";
+        for (int i = 0; i < tupleCount; ++i) {
+            stringBuilder.append(separator);
+            stringBuilder.append("(");
+
+            stringBuilder.append(Query.buildAndList(columnNames));
+
+            stringBuilder.append(")");
+
+            separator = " OR ";
+        }
+        return stringBuilder.toString();
+    }
+
     protected final String _query;
     protected final MutableList<TypedParameter> _parameters;
     protected final ParameterFactory _parameterFactory;
 
-    protected final MutableList<List<InClauseParameter>> _inClauseParameters = new MutableList<List<InClauseParameter>>();
+    protected final MutableList<ExtendedInClauseParameters> _inClauseParameters = new MutableList<ExtendedInClauseParameters>();
     protected final MutableList<Integer> _inClauseParameterIndexes = new MutableList<Integer>();
     protected Integer _nextParameterIndex = 0;
 
-    protected void _setInClauseParameters(final InClauseParameter inClauseParameter, final InClauseParameter[] extraInClauseParameters) {
+    protected void _setInClauseParameters(final InClauseParameter inClauseParameter, final InClauseParameter[] extraInClauseParameters, final Boolean enableExpandedInClause) {
         final MutableList<InClauseParameter> valueTuples = new MutableList<InClauseParameter>((extraInClauseParameters != null ? extraInClauseParameters.length : 0) + 1);
-        valueTuples.add(inClauseParameter);
+        valueTuples.add(Util.coalesce(inClauseParameter, InClauseParameter.NULL));
 
         if (extraInClauseParameters != null) {
             for (final InClauseParameter extraInClauseParameter : extraInClauseParameters) {
@@ -82,7 +128,19 @@ public class Query {
             }
         }
 
-        _inClauseParameters.add(valueTuples);
+        _inClauseParameters.add(new ExtendedInClauseParameters(valueTuples, enableExpandedInClause));
+        _inClauseParameterIndexes.add(_nextParameterIndex);
+        _nextParameterIndex += 1;
+    }
+
+    protected  <T> void _setInClauseParameters(final Iterable<? extends T> values, final ValueExtractor<T> valueExtractor, final Boolean enableExpandedInClause) {
+        final MutableList<InClauseParameter> typedParameters = new MutableList<InClauseParameter>();
+        for (final T value : values) {
+            final InClauseParameter inClauseParameter = valueExtractor.extractValues(value);
+            typedParameters.add(Util.coalesce(inClauseParameter, InClauseParameter.NULL));
+        }
+
+        _inClauseParameters.add(new ExtendedInClauseParameters(typedParameters, enableExpandedInClause));
         _inClauseParameterIndexes.add(_nextParameterIndex);
         _nextParameterIndex += 1;
     }
@@ -211,28 +269,32 @@ public class Query {
     }
 
     public Query setInClauseParameters(final InClauseParameter inClauseParameter, final InClauseParameter... extraInClauseParameters) {
-        _setInClauseParameters(Util.coalesce(inClauseParameter, InClauseParameter.NULL), extraInClauseParameters);
+        _setInClauseParameters(inClauseParameter, extraInClauseParameters, false);
         return this;
     }
 
     public <T> Query setInClauseParameters(final Iterable<? extends T> values, final ValueExtractor<T> valueExtractor) {
-        final MutableList<InClauseParameter> typedParameters = new MutableList<InClauseParameter>();
-        for (final T value : values) {
-            final InClauseParameter inClauseParameter = valueExtractor.extractValues(value);
-            typedParameters.add(Util.coalesce(inClauseParameter, InClauseParameter.NULL));
-        }
+        _setInClauseParameters(values, valueExtractor, false);
+        return this;
+    }
 
-        _inClauseParameters.add(typedParameters);
-        _inClauseParameterIndexes.add(_nextParameterIndex);
-        _nextParameterIndex += 1;
+    public <T> Query setExpandedInClauseParameters(final InClauseParameter inClauseParameter, final InClauseParameter... extraInClauseParameters) {
+        _setInClauseParameters(inClauseParameter, extraInClauseParameters, true);
+        return this;
+    }
+
+    public <T> Query setExpandedInClauseParameters(final Iterable<? extends T> values, final ValueExtractor<T> valueExtractor) {
+        _setInClauseParameters(values, valueExtractor, true);
         return this;
     }
 
     public String getQueryString() {
         final int inClauseCount = _inClauseParameters.getCount();
+        if (inClauseCount == 0) {
+            return _query;
+        }
 
-        final Pattern pattern = Pattern.compile("IN[ ]*\\(\\?\\)");
-        final Matcher matcher = pattern.matcher(_query);
+        final Matcher matcher = Query.IN_CLAUSE_PATTERN.matcher(_query);
 
         final StringBuffer stringBuffer = new StringBuffer();
         {
@@ -242,9 +304,28 @@ public class Query {
                     break;
                 }
 
-                final List<InClauseParameter> inClauseValues = _inClauseParameters.get(matchCount);
-                final String inClause = Query.buildInClause(inClauseValues);
-                matcher.appendReplacement(stringBuffer, inClause);
+                final ExtendedInClauseParameters extendedInClauseParameters = _inClauseParameters.get(matchCount);
+                final List<InClauseParameter> inClauseParameters = extendedInClauseParameters.inClauseParameters;
+                final Boolean useExpandedInClause = extendedInClauseParameters.isExtendedInClause;
+
+                final String rawColumnNames = matcher.group(1);
+                if (useExpandedInClause) {
+                    final Matcher columnNameMatcher = Query.TUPLE_PATTERN.matcher(rawColumnNames);
+
+                    final MutableList<String> columnNames = new MutableList<String>();
+                    while (columnNameMatcher.find()) {
+                        final String columnName = columnNameMatcher.group(1);
+                        columnNames.add(columnName);
+                    }
+
+                    final String inClause = Query.buildExpandedWhereInClause(columnNames, inClauseParameters.getCount());
+                    matcher.appendReplacement(stringBuffer, inClause);
+                }
+                else {
+                    final String inClause = Query.buildInClause(inClauseParameters);
+                    matcher.appendReplacement(stringBuffer, (rawColumnNames + " " + inClause));
+                }
+
                 matchCount += 1;
             }
             matcher.appendTail(stringBuffer);
@@ -278,7 +359,8 @@ public class Query {
         final int loopCount = (_parameters.getCount() + inClauseCount);
         for (int i = 0; i < loopCount; ++i) {
             if (nextInClauseParameterIndex == returnedParameterIndex) {
-                for (final InClauseParameter inClauseParameter : _inClauseParameters.get(inClauseIndex)) {
+                final ExtendedInClauseParameters extendedInClauseParameters = _inClauseParameters.get(inClauseIndex);
+                for (final InClauseParameter inClauseParameter : extendedInClauseParameters.inClauseParameters) {
                     if (inClauseParameter.getType() == InClauseParameter.Type.NULL) {
                         parameters.add(TypedParameter.NULL);
                     }

@@ -173,4 +173,139 @@ public class QueryTests {
         Assert.assertEquals("SELECT id FROM table WHERE (value0, value1) IN ((?,?), (?,?), (?,?))", queryString);
         Assert.assertEquals(6, parameters.size());
     }
+
+    @Test
+    public void should_create_query_with_tuples_and_regular_parameter() {
+        // Setup
+        final Query query = new Query("SELECT id FROM table WHERE (value0, value1) IN (?) AND `key` = ?");
+        final Long keyValue = 1L;
+
+        final ValueExtractor<Tuple<String, String>> stringTupleExtractor = new ValueExtractor<Tuple<String, String>>() {
+            @Override
+            public InClauseParameter extractValues(final Tuple<String, String> tuple) {
+                final TypedParameter typedParameter0 = new TypedParameter(tuple.first);
+                final TypedParameter typedParameter1 = new TypedParameter(tuple.second);
+                return new InClauseParameter(typedParameter0, typedParameter1);
+            }
+        };
+
+        final MutableList<Tuple<String, String>> values = new MutableList<Tuple<String, String>>();
+        for (int i = 0; i < 3; ++i) {
+            values.add(new Tuple<String, String>("Value0-" + i, "Value1-" + i));
+        }
+
+        // Action
+        query.setInClauseParameters(values, stringTupleExtractor);
+        query.setParameter(keyValue);
+
+        final String queryString = query.getQueryString();
+        final List<TypedParameter> parameters = query.getParameters();
+
+        // Assert
+        Assert.assertEquals("SELECT id FROM table WHERE (value0, value1) IN ((?,?), (?,?), (?,?)) AND `key` = ?", queryString);
+        Assert.assertEquals(7, parameters.size());
+        Assert.assertEquals("Value0-0", parameters.get(0).value);
+        Assert.assertEquals("Value1-0", parameters.get(1).value);
+        Assert.assertEquals("Value0-1", parameters.get(2).value);
+        Assert.assertEquals("Value1-1", parameters.get(3).value);
+        Assert.assertEquals("Value0-2", parameters.get(4).value);
+        Assert.assertEquals("Value1-2", parameters.get(5).value);
+        Assert.assertEquals(keyValue, parameters.get(6).value);
+    }
+    
+    @Test
+    public void should_create_query_with_expanded_in_clause() {
+        // Setup
+        final Query query = new Query("SELECT id FROM table WHERE key IN (?)");
+
+        final MutableList<String> values = new MutableList<String>();
+        for (int i = 0; i < 3; ++i) {
+            values.add("Value-" + i);
+        }
+
+        // Action
+        query.setExpandedInClauseParameters(values, ValueExtractor.STRING);
+
+        final String queryString = query.getQueryString();
+        final List<TypedParameter> parameters = query.getParameters();
+
+        // Assert
+        Assert.assertEquals("SELECT id FROM table WHERE (key = ?) OR (key = ?) OR (key = ?)", queryString);
+        Assert.assertEquals(3, parameters.size());
+        Assert.assertEquals("Value-0", parameters.get(0).value);
+        Assert.assertEquals("Value-1", parameters.get(1).value);
+        Assert.assertEquals("Value-2", parameters.get(2).value);
+    }
+
+    @Test
+    public void should_create_query_with_expanded_in_clause_with_tuple() {
+        // Setup
+        final Query query = new Query("SELECT id FROM table WHERE (key0, key1) IN (?)");
+
+        final ValueExtractor<Tuple<String, String>> stringTupleExtractor = new ValueExtractor<Tuple<String, String>>() {
+            @Override
+            public InClauseParameter extractValues(final Tuple<String, String> tuple) {
+                final TypedParameter typedParameter0 = new TypedParameter(tuple.first);
+                final TypedParameter typedParameter1 = new TypedParameter(tuple.second);
+                return new InClauseParameter(typedParameter0, typedParameter1);
+            }
+        };
+
+        final MutableList<Tuple<String, String>> values = new MutableList<Tuple<String, String>>();
+        for (int i = 0; i < 3; ++i) {
+            values.add(new Tuple<String, String>("Value0-" + i, "Value1-" + i));
+        }
+
+        // Action
+        query.setExpandedInClauseParameters(values, stringTupleExtractor);
+
+        final String queryString = query.getQueryString();
+        final List<TypedParameter> parameters = query.getParameters();
+
+        // Assert
+        Assert.assertEquals("SELECT id FROM table WHERE (key0 = ? AND key1 = ?) OR (key0 = ? AND key1 = ?) OR (key0 = ? AND key1 = ?)", queryString);
+        Assert.assertEquals(6, parameters.size());
+        Assert.assertEquals("Value0-0", parameters.get(0).value);
+        Assert.assertEquals("Value1-0", parameters.get(1).value);
+        Assert.assertEquals("Value0-1", parameters.get(2).value);
+        Assert.assertEquals("Value1-1", parameters.get(3).value);
+        Assert.assertEquals("Value0-2", parameters.get(4).value);
+        Assert.assertEquals("Value1-2", parameters.get(5).value);
+    }
+
+    @Test
+    public void should_create_query_with_expanded_in_clause_with_escaped_tuple() {
+        // Setup
+        final Query query = new Query("SELECT id FROM table WHERE (`key0`, `key1`) IN (?)");
+
+        final ValueExtractor<Tuple<String, String>> stringTupleExtractor = new ValueExtractor<Tuple<String, String>>() {
+            @Override
+            public InClauseParameter extractValues(final Tuple<String, String> tuple) {
+                final TypedParameter typedParameter0 = new TypedParameter(tuple.first);
+                final TypedParameter typedParameter1 = new TypedParameter(tuple.second);
+                return new InClauseParameter(typedParameter0, typedParameter1);
+            }
+        };
+
+        final MutableList<Tuple<String, String>> values = new MutableList<Tuple<String, String>>();
+        for (int i = 0; i < 3; ++i) {
+            values.add(new Tuple<String, String>("Value0-" + i, "Value1-" + i));
+        }
+
+        // Action
+        query.setExpandedInClauseParameters(values, stringTupleExtractor);
+
+        final String queryString = query.getQueryString();
+        final List<TypedParameter> parameters = query.getParameters();
+
+        // Assert
+        Assert.assertEquals("SELECT id FROM table WHERE (`key0` = ? AND `key1` = ?) OR (`key0` = ? AND `key1` = ?) OR (`key0` = ? AND `key1` = ?)", queryString);
+        Assert.assertEquals(6, parameters.size());
+        Assert.assertEquals("Value0-0", parameters.get(0).value);
+        Assert.assertEquals("Value1-0", parameters.get(1).value);
+        Assert.assertEquals("Value0-1", parameters.get(2).value);
+        Assert.assertEquals("Value1-1", parameters.get(3).value);
+        Assert.assertEquals("Value0-2", parameters.get(4).value);
+        Assert.assertEquals("Value1-2", parameters.get(5).value);
+    }
 }
