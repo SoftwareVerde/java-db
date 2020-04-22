@@ -318,7 +318,7 @@ public class Query {
                         columnNames.add(columnName);
                     }
 
-                    final String inClause = Query.buildExpandedWhereInClause(columnNames, inClauseParameters.getCount());
+                    final String inClause = "(" + Query.buildExpandedWhereInClause(columnNames, inClauseParameters.getCount()) + ")";
                     matcher.appendReplacement(stringBuffer, inClause);
                 }
                 else {
