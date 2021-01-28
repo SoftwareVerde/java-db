@@ -4,7 +4,6 @@ import com.softwareverde.database.query.parameter.ParameterFactory;
 
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BatchedInsertQuery extends Query {

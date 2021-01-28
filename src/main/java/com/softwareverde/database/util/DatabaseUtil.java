@@ -2,10 +2,7 @@ package com.softwareverde.database.util;
 
 import com.softwareverde.constable.list.List;
 import com.softwareverde.constable.list.immutable.ImmutableListBuilder;
-import com.softwareverde.database.row.Row;
-import com.softwareverde.util.Util;
 
-import java.util.Collection;
 import java.util.Map;
 
 public class DatabaseUtil {
