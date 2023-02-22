@@ -105,7 +105,15 @@ public class JdbcDatabaseConnection implements DatabaseConnection<Connection>, A
             try (final PreparedStatement preparedStatement = _prepareStatement(query, typedParameters);
                  final ResultSet resultSet = preparedStatement.executeQuery() ) {
 
-                if (resultSet.first()) {
+                boolean shouldIterate;
+                if (resultSet.getType() == ResultSet.TYPE_FORWARD_ONLY) {
+                    shouldIterate = resultSet.next();
+                }
+                else {
+                    shouldIterate = resultSet.first();
+                }
+
+                if (shouldIterate) {
                     do {
                         results.add(_rowFactory.fromResultSet(resultSet));
                     } while (resultSet.next());
